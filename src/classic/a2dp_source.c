@@ -65,8 +65,8 @@
 #include "l2cap.h"
 #include "a2dp.h"
 
-static const char * a2dp_source_default_service_name = "BTstack A2DP Source Service";
-static const char * a2dp_default_source_service_provider_name = "BTstack A2DP Source Service Provider";
+static const char * a2dp_source_default_service_name = "BTstack A2DP Source Service Test Heeiie";
+static const char * a2dp_default_source_service_provider_name = "BTstack A2DP Source Test Heeiie";
 
 static uint8_t (*a2dp_source_media_config_validator)(const avdtp_stream_endpoint_t * stream_endpoint, const uint8_t * event, uint16_t size);
 

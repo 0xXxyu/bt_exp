@@ -82,7 +82,7 @@ const uint8_t adv_data_len = sizeof(adv_data);
 #include "sm_test.h"
 
 static uint8_t sm_have_oob_data = 0;
-static io_capability_t sm_io_capabilities = IO_CAPABILITY_DISPLAY_ONLY;
+static io_capability_t sm_io_capabilities = IO_CAPABILITY_NO_INPUT_NO_OUTPUT; //修改IO能力
 static uint8_t sm_auth_req = 0;
 static uint8_t sm_failure = 0;
 
