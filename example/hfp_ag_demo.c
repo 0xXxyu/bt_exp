@@ -36,7 +36,9 @@
  */
 
 #define BTSTACK_FILE__ "hfp_ag_demo.c"
- 
+#define HAVE_BTSTACK_STDIN
+
+// vscode无法正确识别#define HAVE_BTSTACK_STDIN定义，额外添加
 /*
  * hfp_ag_demo.c
  */
@@ -67,10 +69,13 @@
 
 uint8_t hfp_service_buffer[150];
 const uint8_t    rfcomm_channel_nr = 1;
-const char hfp_ag_service_name[] = "HFP AG Demo";
+const char hfp_ag_service_name[] = "HFP AG Test Heeiie";
 
 static bd_addr_t device_addr;
-static const char * device_addr_string = "00:1A:7D:DA:71:13";
+// static const char * device_addr_string = "00:1A:7D:DA:71:13";
+
+//MS11 
+static const char * device_addr_string = "A4:04:50:23:83:AB";
 
 #ifdef ENABLE_HFP_WIDE_BAND_SPEECH
 static uint8_t codecs[] = {HFP_CODEC_CVSD, HFP_CODEC_MSBC};
@@ -478,12 +483,14 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
                 case BTSTACK_EVENT_STATE:
                     if (btstack_event_state_get_state(event) != HCI_STATE_WORKING) break;
                     dump_supported_codecs();
+                    // printf("走到这里了11111111")
 #ifndef HAVE_BTSTACK_STDIN
                     printf("Establish HFP AG service level connection to %s...\n", bd_addr_to_str(device_addr));
                     hfp_ag_establish_service_level_connection(device_addr);
 #endif
                     break;
                 case GAP_EVENT_INQUIRY_RESULT:
+                    // printf("case 开始扫描");
                     gap_event_inquiry_result_get_bd_addr(event, addr);
                     // print info
                     printf("Device found: %s ",  bd_addr_to_str(addr));
@@ -504,9 +511,11 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
                     printf("Inquiry scan complete.\n");
                     break;
                 case HCI_EVENT_SCO_CAN_SEND_NOW:
+                    // printf("hci case sco");
                     sco_demo_send(sco_handle); 
                     break; 
                 default:
+                    // printf("case default break");
                     break;
             }
 
@@ -523,6 +532,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
                     hfp_subevent_service_level_connection_established_get_bd_addr(event, device_addr);
                     printf("Service level connection established to %s.\n", bd_addr_to_str(device_addr));
                     dump_supported_codecs();
+                    // printf("hfp 222222");
 #ifndef HAVE_BTSTACK_STDIN
                     log_info("Establish Audio connection %s", bd_addr_to_str(device_addr));
                     printf("Establish Audio connection %s...\n", bd_addr_to_str(device_addr));
@@ -646,6 +656,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
 
                 case HFP_SUBEVENT_ENHANCED_VOICE_RECOGNITION_AG_READY_TO_ACCEPT_AUDIO_INPUT:
                     status = hfp_subevent_enhanced_voice_recognition_ag_ready_to_accept_audio_input_get_status(event);
+    
                     report_status(status, "Enhanced Voice recognition: AG READY TO ACCEPT AUDIO INPUT");                   
                     break;
 
@@ -719,9 +730,10 @@ int btstack_main(int argc, const char * argv[]){
     sco_demo_init();
 
     // Request role change on reconnecting headset to always use them in slave mode
-    hci_set_master_slave_policy(0);
+    hci_set_master_slave_policy(HCI_ROLE_SLAVE);
+    // 修改成slave
 
-    gap_set_local_name("HFP AG Demo 00:00:00:00:00:00");
+    gap_set_local_name("HFP AG Test Heeiie");
     gap_discoverable_control(1);
 
     // L2CAP

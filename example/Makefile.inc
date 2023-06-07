@@ -3,8 +3,6 @@ VPATH += ${BTSTACK_ROOT}/src
 VPATH += ${BTSTACK_ROOT}/src/ble
 VPATH += ${BTSTACK_ROOT}/src/ble/gatt-service
 VPATH += ${BTSTACK_ROOT}/src/classic
-VPATH += ${BTSTACK_ROOT}/src/mesh
-VPATH += ${BTSTACK_ROOT}/src/mesh/gatt-service
 VPATH += ${BTSTACK_ROOT}/example
 VPATH += ${BTSTACK_ROOT}/3rd-party/bluedroid/decoder/srce
 VPATH += ${BTSTACK_ROOT}/3rd-party/bluedroid/encoder/srce
@@ -27,7 +25,6 @@ VPATH += ${BTSTACK_ROOT}/platform/lwip/port
 CFLAGS += -I.
 CFLAGS += -I${BTSTACK_ROOT}/src/ble
 CFLAGS += -I${BTSTACK_ROOT}/src/classic
-CFLAGS += -I${BTSTACK_ROOT}/src/mesh
 CFLAGS += -I${BTSTACK_ROOT}/src
 CFLAGS += -I${BTSTACK_ROOT}/3rd-party/bluedroid/decoder/include
 CFLAGS += -I${BTSTACK_ROOT}/3rd-party/bluedroid/encoder/include
@@ -148,40 +145,6 @@ HXCMOD_PLAYER = \
 	hxcmod.c                    \
 	nao-deceased_by_disease.c 	\
 
-MESH = \
-	adv_bearer.c \
-	beacon.c \
-	gatt_bearer.c \
-	mesh.c \
-	mesh_access.c \
-	mesh_configuration_client.c \
-	mesh_configuration_server.c \
-	mesh_crypto.c \
-	mesh_foundation.c \
-	mesh_generic_default_transition_time_client.c \
-	mesh_generic_default_transition_time_server.c \
-	mesh_generic_level_client.c \
-	mesh_generic_level_server.c \
-	mesh_generic_on_off_client.c \
-	mesh_generic_on_off_server.c \
-	mesh_health_server.c \
-	mesh_iv_index_seq_number.c \
-	mesh_keys.c \
-	mesh_lower_transport.c \
-	mesh_network.c \
-	mesh_node.c \
-	mesh_peer.c \
-	mesh_provisioning_service_server.c \
-	mesh_proxy.c \
-	mesh_proxy_service_server.c \
-	mesh_upper_transport.c \
-	mesh_virtual_addresses.c \
-	pb_adv.c \
-	pb_gatt.c \
-	provisioning.c \
-	provisioning_device.c \
-	provisioning_provisioner.c \
-
 # List of General Examples without Bluetooth
 
 EXAMPLES_GENERAL =          \
@@ -236,7 +199,6 @@ EXAMPLES_LE_ONLY=           		\
 	le_credit_based_flow_control_mode_server  		\
 	le_mitm                 		\
 	le_streamer_client      		\
-	mesh_node_demo          		\
 	nordic_spp_le_counter   		\
 	nordic_spp_le_streamer  		\
 	sm_pairing_central      		\
@@ -290,7 +252,6 @@ AVDTP_OBJ  = $(AVDTP:.c=.o)
 AVRCP_OBJ  = $(AVRCP:.c=.o)
 HXCMOD_PLAYER_OBJ = $(HXCMOD_PLAYER:.c=.o)
 LWIP_OBJ = $(LWIP_SRC:.c=.o)
-MESH_OBJ = $(MESH:.c=.o)
 
 default_target: all
 
@@ -532,13 +493,6 @@ ublox_spp_le_counter.o: ublox_spp_le_counter.h ublox_spp_le_counter.c
 	${CC} ${CFLAGS} -c $(filter-out ublox_spp_le_counter.h,$^) -o $@
 
 ublox_spp_le_counter: ${CORE_OBJ} ${COMMON_OBJ} ${ATT_OBJ} ${GATT_SERVER_OBJ} device_information_service_server.o ublox_spp_service_server.o ublox_spp_le_counter.o
-	${CC} $^ ${LDFLAGS} -o $@
-
-
-mesh_node_demo.o: mesh_node_demo.h mesh_node_demo.c
-	${CC} ${CFLAGS} -c $(filter-out mesh_node_demo.h,$^) -o $@
-
-mesh_node_demo:${CORE_OBJ} ${COMMON_OBJ} ${MESH_OBJ} ${ATT_OBJ} ${GATT_SERVER_OBJ} ${SM_OBJ} mesh_node_demo.o
 	${CC} $^ ${LDFLAGS} -o $@
 
 clean:

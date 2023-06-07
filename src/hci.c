@@ -36,6 +36,7 @@
  */
 
 #define BTSTACK_FILE__ "hci.c"
+#define ENABLE_CLASSIC  //heeiie 添加classic定义
 
 /*
  *  hci.c

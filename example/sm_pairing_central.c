@@ -70,7 +70,7 @@
 
 // Fixed passkey - used with sm_pairing_peripheral. Passkey is random in general
 #define FIXED_PASSKEY 123456U
-
+char * tar_addr;
 
 static btstack_packet_callback_registration_t hci_event_callback_registration;
 static btstack_packet_callback_registration_t sm_event_callback_registration;
@@ -87,6 +87,8 @@ static void hci_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *p
 static void sm_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packet, uint16_t size);
 
 static void sm_pairing_central_setup(void){
+    
+    // scanf("Input target device address: %s", &tar_addr);
     l2cap_init();
 
     // setup SM: Display only
@@ -124,7 +126,7 @@ static void sm_pairing_central_setup(void){
     // sm_set_authentication_requirements(0);
 
     // LE Legacy Pairing, Passkey entry initiator enter, responder (us) displays
-    // sm_set_io_capabilities(IO_CAPABILITY_DISPLAY_ONLY);
+    sm_set_io_capabilities(IO_CAPABILITY_DISPLAY_ONLY);
     // sm_set_authentication_requirements(SM_AUTHREQ_MITM_PROTECTION);
     // sm_use_fixed_passkey_in_display_role(FIXED_PASSKEY);
 
@@ -147,7 +149,7 @@ static void sm_pairing_central_setup(void){
     // sm_use_fixed_passkey_in_display_role(FIXED_PASSKEY);
 
     // LE Secure Pairing, Passkey entry initiator (us) displays, responder enters
-    // sm_set_io_capabilities(IO_CAPABILITY_DISPLAY_ONLY);
+    sm_set_io_capabilities(IO_CAPABILITY_DISPLAY_ONLY);
     // sm_set_authentication_requirements(SM_AUTHREQ_SECURE_CONNECTION|SM_AUTHREQ_MITM_PROTECTION);
 #endif
 }
@@ -185,13 +187,19 @@ static void hci_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *p
             bd_addr_t address;
             gap_event_advertising_report_get_address(packet, address);
             uint8_t address_type = gap_event_advertising_report_get_address_type(packet);
-            uint8_t length = gap_event_advertising_report_get_data_length(packet);
-            const uint8_t * data = gap_event_advertising_report_get_data(packet);
+            // uint8_t length = gap_event_advertising_report_get_data_length(packet);
+            // const uint8_t * data = gap_event_advertising_report_get_data(packet);
             // printf("Advertisement event: addr-type %u, addr %s, data[%u] ",
             //   address_type, bd_addr_to_str(address), length);
             // printf_hexdump(data, length);
-            if (!ad_data_contains_uuid16(length, (uint8_t *) data, REMOTE_SERVICE)) break;
-            printf("Found remote with UUID %04x, connecting...\n", REMOTE_SERVICE);
+
+            
+            // if (!ad_data_contains_uuid16(length, (uint8_t *) data, REMOTE_SERVICE)) break;
+            // printf("Found remote with UUID %04x, connecting...\n", REMOTE_SERVICE);
+
+            if (strcmp(bd_addr_to_str(address), tar_addr)) break;
+            printf("Found remote device, connecting...\n");
+            
             gap_stop_scan();
             gap_connect(address,address_type);
             break;
