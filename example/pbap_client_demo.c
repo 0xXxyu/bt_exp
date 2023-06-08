@@ -56,6 +56,8 @@
 
 #include "btstack.h"
 
+#define HAVE_BTSTACK_STDIN
+
 #ifdef HAVE_BTSTACK_STDIN
 #include "btstack_stdin.h"
 #endif
@@ -67,9 +69,14 @@ static bd_addr_t    remote_addr;
 // Nexus 7 "30-85-A9-54-2E-78"
 // iPhone SE "BC:EC:5D:E6:15:03"
 // PTS "001BDC080AA5"
-static  char * remote_addr_string = "DC:52:85:B4:AD:2B ";
+// static  char * remote_addr_string = "DC:52:85:B4:AD:2B ";
 
-static char * phone_number = "911";
+// add input from user 1 change 2
+static bd_addr_t cmdline_addr;
+static int cmdline_addr_found = 0;
+// add input from user end
+
+static char * phone_number = "10001";
 
 static const char * pb_name   = "pb";
 static const char * fav_name  = "fav";
@@ -117,7 +124,7 @@ static void show_usage(void){
     printf("Phonebook:       '%s'\n", phonebook_folder);
     printf("Phonebook path   '%s'\n", phonebook_path);
     printf("\n");
-    printf("a - establish PBAP connection to %s\n", bd_addr_to_str(remote_addr));
+    printf("a - establish PBAP connection to %s\n", bd_addr_to_str(cmdline_addr));
     printf("b - select SIM1\n");
     printf("r - set path to '/telecom'\n");
     printf("R - set path to '/SIM1/telecom'\n");
@@ -151,9 +158,10 @@ static void stdin_process(char c){
         case '\r':
             break;
         case 'a':
-            printf("[+] Connecting to %s...\n", bd_addr_to_str(remote_addr));
-            pbap_connect(&packet_handler, remote_addr, &pbap_cid);
+            printf("[+] Connecting to %s...\n", bd_addr_to_str(cmdline_addr));
+            pbap_connect(&packet_handler, cmdline_addr, &pbap_cid);
             break;
+            
         case 'b':
             printf("[+] SIM1 selected'\n");
             sim1_selected = 1;
@@ -343,8 +351,8 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
                 case BTSTACK_EVENT_STATE:
                     // BTstack activated, get started 
                     if (btstack_event_state_get_state(packet) == HCI_STATE_WORKING){
-                        printf("[+] Connect to Phone Book Server on %s\n", bd_addr_to_str(remote_addr));
-                        pbap_connect(&packet_handler, remote_addr, &pbap_cid);
+                        printf("[+] Connect to Phone Book Server on %s\n", bd_addr_to_str(cmdline_addr));
+                        pbap_connect(&packet_handler, cmdline_addr, &pbap_cid);
                     }
                     break;
                 case HCI_EVENT_PBAP_META:
@@ -383,7 +391,28 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *packe
 
 int btstack_main(int argc, const char * argv[]);
 int btstack_main(int argc, const char * argv[]){
-    (void)argc;
+
+    // change 1
+    int arg = 1;
+    cmdline_addr_found = 0;
+
+    while (!cmdline_addr_found){
+        if (arg < argc){
+            if(!strcmp(argv[arg], "-a") || !strcmp(argv[arg], "--address")){
+            arg++;
+            cmdline_addr_found = sscanf_bd_addr(argv[arg], cmdline_addr);
+            arg++;
+            }
+        }
+        else {
+            // printf("Didn't find remote device.");
+            fprintf(stderr, "\nUsage: %s [-a|--address aa:bb:cc:dd:ee:ff]\n", argv[0]);
+            exit(1);
+        }
+    }
+
+    // printf("find device: %s\n", bd_addr_to_str(cmdline_addr));
+    //add input from user end
     (void)argv;
 
     // init L2CAP
@@ -407,7 +436,7 @@ int btstack_main(int argc, const char * argv[]){
     hci_event_callback_registration.callback = &packet_handler;
     hci_add_event_handler(&hci_event_callback_registration);
 
-    sscanf_bd_addr(remote_addr_string, remote_addr);
+    // sscanf_bd_addr(remote_addr_string, remote_addr);
 
     select_phonebook(pb_name);
 

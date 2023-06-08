@@ -83,6 +83,11 @@
 
 #define SBC_STORAGE_SIZE 1030
 
+// add input from user 1 change 1
+static bd_addr_t cmdline_addr;
+static int cmdline_addr_found = 0;
+// add input from user end
+
 typedef enum {
     STREAM_SINE = 0,
     STREAM_MOD,
@@ -168,10 +173,10 @@ static btstack_packet_callback_registration_t hci_event_callback_registration;
 // Minijambox:
 // static const char * device_addr_string = "00:21:3C:AC:F7:38";
 
-static const char * device_addr_string = "A4:04:50:23:83:AB";
+// static const char * device_addr_string = "A4:04:50:23:83:AB";
 
 
-static bd_addr_t device_addr;
+// static bd_addr_t device_addr;
 static bool scan_active;
 
 static uint8_t sdp_a2dp_source_service_buffer[150];
@@ -248,6 +253,8 @@ static int a2dp_source_and_avrcp_services_init(void){
 
     // Request role change on reconnecting headset to always use them in slave mode
     hci_set_master_slave_policy(0);
+    //这里可以修改role
+
     // enabled EIR
     hci_set_inquiry_mode(INQUIRY_MODE_RSSI_AND_EIR);
 
@@ -327,7 +334,7 @@ static int a2dp_source_and_avrcp_services_init(void){
     data_source = STREAM_MOD;
 
     // Parse human readable Bluetooth address.
-    sscanf_bd_addr(device_addr_string, device_addr);
+    sscanf_bd_addr(bd_addr_to_str(cmdline_addr), cmdline_addr);
 
 #ifdef HAVE_BTSTACK_STDIN
     btstack_stdin_setup(stdin_process);
@@ -555,11 +562,11 @@ static void hci_packet_handler(uint8_t packet_type, uint16_t channel, uint8_t *p
             }
             printf("\n");
             if ((cod & bluetooth_speaker_cod) == bluetooth_speaker_cod){
-                memcpy(device_addr, address, 6);
-                printf("Bluetooth speaker detected, trying to connect to %s...\n", bd_addr_to_str(device_addr));
+                memcpy(cmdline_addr, address, 6);
+                printf("Bluetooth speaker detected, trying to connect to %s...\n", bd_addr_to_str(cmdline_addr));
                 scan_active = false;
                 gap_inquiry_stop();
-                a2dp_source_establish_stream(device_addr, &media_tracker.a2dp_cid);
+                a2dp_source_establish_stream(cmdline_addr, &media_tracker.a2dp_cid);
             }
             break;
         case GAP_EVENT_INQUIRY_COMPLETE:
@@ -896,9 +903,9 @@ static void show_usage(void){
     gap_local_bd_addr(iut_address);
     printf("\n--- Bluetooth  A2DP Source/AVRCP Demo %s ---\n", bd_addr_to_str(iut_address));
     printf("a      - Scan for Bluetooth speaker and connect\n");
-    printf("b      - A2DP Source create connection to addr %s\n", device_addr_string);
+    printf("b      - A2DP Source create connection to addr %s\n", bd_addr_to_str(cmdline_addr));
     printf("B      - A2DP Source disconnect\n");
-    printf("c      - AVRCP create connection to addr %s\n", device_addr_string);
+    printf("c      - AVRCP create connection to addr %s\n", bd_addr_to_str(cmdline_addr));
     printf("C      - AVRCP disconnect\n");
     printf("D      - delete all link keys\n");
 
@@ -924,16 +931,16 @@ static void stdin_process(char cmd){
             a2dp_source_demo_start_scanning();
             break;
         case 'b':
-            status = a2dp_source_establish_stream(device_addr, &media_tracker.a2dp_cid);
-            printf("%c - Create A2DP Source connection to addr %s, cid 0x%02x.\n", cmd, bd_addr_to_str(device_addr), media_tracker.a2dp_cid);
+            status = a2dp_source_establish_stream(cmdline_addr, &media_tracker.a2dp_cid);
+            printf("%c - Create A2DP Source connection to addr %s, cid 0x%02x.\n", cmd, bd_addr_to_str(cmdline_addr), media_tracker.a2dp_cid);
             break;
         case 'B':
             printf("%c - A2DP Source Disconnect from cid 0x%2x\n", cmd, media_tracker.a2dp_cid);
             status = a2dp_source_disconnect(media_tracker.a2dp_cid);
             break;
         case 'c':
-            printf("%c - Create AVRCP connection to addr %s.\n", cmd, bd_addr_to_str(device_addr));
-            status = avrcp_connect(device_addr, &media_tracker.avrcp_cid);
+            printf("%c - Create AVRCP connection to addr %s.\n", cmd, bd_addr_to_str(cmdline_addr));
+            status = avrcp_connect(cmdline_addr, &media_tracker.avrcp_cid);
             break;
         case 'C':
             printf("%c - AVRCP disconnect\n", cmd);
@@ -1043,7 +1050,29 @@ static void stdin_process(char cmd){
 
 int btstack_main(int argc, const char * argv[]);
 int btstack_main(int argc, const char * argv[]){
-    (void)argc;
+        //add input from user 
+     // change 4
+
+    int arg = 1;
+    cmdline_addr_found = 0;
+
+    while (!cmdline_addr_found){
+        if (arg < argc){
+            if(!strcmp(argv[arg], "-a") || !strcmp(argv[arg], "--address")){
+            arg++;
+            cmdline_addr_found = sscanf_bd_addr(argv[arg], cmdline_addr);
+            arg++;
+            }
+        }
+        else {
+            // printf("Didn't find remote device.");
+            fprintf(stderr, "\nUsage: %s [-a|--address aa:bb:cc:dd:ee:ff]\n", argv[0]);
+            exit(1);
+        }
+    }
+
+    // printf("find device: %s\n", bd_addr_to_str(cmdline_addr));
+    //add input from user end
     (void)argv;
     
     int err = a2dp_source_and_avrcp_services_init();

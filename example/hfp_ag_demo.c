@@ -204,13 +204,10 @@ static void stdin_process(char cmd){
     switch (cmd){
         case 'a':
             log_info("USER:\'%c\'", cmd);
-            // change input addr 2
-            if (cmdline_addr_found){
-                printf("Establish HFP service level connection to %s...\n", bd_addr_to_str(cmdline_addr));
-                status = hfp_ag_establish_service_level_connection(device_addr);
-                break;
-            }
-            
+            // change input addr 2 change 5
+            printf("Establish HFP service level connection to %s...\n", bd_addr_to_str(cmdline_addr));
+            status = hfp_ag_establish_service_level_connection(device_addr);
+            break; 
         case 'A':
             log_info("USER:\'%c\'", cmd);
             printf("Release HFP service level connection.\n");

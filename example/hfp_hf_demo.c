@@ -61,6 +61,8 @@
 #include "btstack.h"
 
 #include "sco_demo_util.h"
+// change 3
+#define HAVE_BTSTACK_STDIN
 
 uint8_t hfp_service_buffer[150];
 const uint8_t   rfcomm_channel_nr = 1;
@@ -68,16 +70,22 @@ const char hfp_hf_service_name[] = "HFP HF Demo";
 
 #ifdef HAVE_BTSTACK_STDIN
 // static const char * device_addr_string = "6C:72:E7:10:22:EE";
-static const char * device_addr_string = "00:02:72:DC:31:C1";
+// static const char * device_addr_string = "00:02:72:DC:31:C1";
 #endif
 
-static bd_addr_t device_addr;
+// static bd_addr_t device_addr;
 
 #ifdef HAVE_BTSTACK_STDIN
 // 80:BE:05:D5:28:48
 // prototypes
 static void show_usage(void);
 #endif
+
+// add input from user 1 change 2
+static bd_addr_t cmdline_addr;
+static int cmdline_addr_found = 0;
+// add input from user end
+
 static hci_con_handle_t acl_handle = HCI_CON_HANDLE_INVALID;
 static hci_con_handle_t sco_handle = HCI_CON_HANDLE_INVALID;
 #ifdef ENABLE_HFP_WIDE_BAND_SPEECH
@@ -128,7 +136,8 @@ static void show_usage(void){
 
     printf("\n--- Bluetooth HFP Hands-Free (HF) unit Test Console %s ---\n", bd_addr_to_str(iut_address));
     printf("\n");
-    printf("a - establish SLC to %s     | ", bd_addr_to_str(device_addr));
+    // change 4
+    printf("a - establish SLC to %s     | ", bd_addr_to_str(cmdline_addr));
     printf("A - release SLC connection to device\n");
     printf("b - establish Audio connection             | B - release Audio connection\n");
     printf("d - query network operator                 | D - Enable HFP AG registration status update via bitmap(IIA)\n");
@@ -192,9 +201,12 @@ static void stdin_process(char c){
             break;
         case 'a':
             log_info("USER:\'%c\'", cmd);
-            printf("Establish Service level connection to device with Bluetooth address %s...\n", bd_addr_to_str(device_addr));
-            status = hfp_hf_establish_service_level_connection(device_addr);
-            break;
+            // change 5
+            if (cmdline_addr_found){
+                printf("Establish Service level connection to device with Bluetooth address %s...\n", bd_addr_to_str(cmdline_addr));
+                status = hfp_hf_establish_service_level_connection(cmdline_addr);
+                break;
+            }
         case 'A':
             log_info("USER:\'%c\'", cmd);
             printf("Release Service level connection.\n");
@@ -202,7 +214,7 @@ static void stdin_process(char c){
             break;
         case 'b':
             log_info("USER:\'%c\'", cmd);
-            printf("Establish Audio connection to device with Bluetooth address %s...\n", bd_addr_to_str(device_addr));
+            printf("Establish Audio connection to device with Bluetooth address %s...\n", bd_addr_to_str(cmdline_addr));
             status = hfp_hf_establish_audio_connection(acl_handle);
             break;
         case 'B':
@@ -317,7 +329,7 @@ static void stdin_process(char c){
             break;
         case 'N':
             log_info("USER:\'%c\'", cmd);
-            printf("Activate voice recognition %s\n", bd_addr_to_str(device_addr));
+            printf("Activate voice recognition %s\n", bd_addr_to_str(cmdline_addr));
             status = hfp_hf_activate_voice_recognition(acl_handle);
             break;
         case 'o':
@@ -490,8 +502,8 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
                                 break;
                             }
                             acl_handle = hfp_subevent_service_level_connection_established_get_acl_handle(event);
-                            hfp_subevent_service_level_connection_established_get_bd_addr(event, device_addr);
-                            printf("Service level connection established %s.\n\n", bd_addr_to_str(device_addr));
+                            hfp_subevent_service_level_connection_established_get_bd_addr(event, cmdline_addr);
+                            printf("Service level connection established %s.\n\n", bd_addr_to_str(cmdline_addr));
                             break;
                         case HFP_SUBEVENT_SERVICE_LEVEL_CONNECTION_RELEASED:
                             acl_handle = HCI_CON_HANDLE_INVALID;
@@ -616,7 +628,7 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
                                     break;
                                 default:
                                     printf("\nEnhanced voice recognition ACTIVATED.\n");
-                                    printf("Start new audio enhanced voice recognition session %s\n\n", bd_addr_to_str(device_addr));
+                                    printf("Start new audio enhanced voice recognition session %s\n\n", bd_addr_to_str(cmdline_addr));
                                     status = hfp_hf_enhanced_voice_recognition_report_ready_for_audio(acl_handle);
                                     break;
                             }
@@ -682,7 +694,30 @@ static void packet_handler(uint8_t packet_type, uint16_t channel, uint8_t * even
 /* LISTING_START(MainConfiguration): Setup HFP Hands-Free unit */
 int btstack_main(int argc, const char * argv[]);
 int btstack_main(int argc, const char * argv[]){
-    (void)argc;
+
+    // change 1
+    int arg = 1;
+    cmdline_addr_found = 0;
+
+    while (!cmdline_addr_found){
+        if (arg < argc){
+            if(!strcmp(argv[arg], "-a") || !strcmp(argv[arg], "--address")){
+            arg++;
+            cmdline_addr_found = sscanf_bd_addr(argv[arg], cmdline_addr);
+            arg++;
+            }
+        }
+        else {
+            // printf("Didn't find remote device.");
+            fprintf(stderr, "\nUsage: %s [-a|--address aa:bb:cc:dd:ee:ff]\n", argv[0]);
+            exit(1);
+        }
+    }
+
+    // printf("find device: %s\n", bd_addr_to_str(cmdline_addr));
+    //add input from user end
+    (void)argv;
+    // (void)argc;
     (void)argv;
 
     sco_demo_init();
@@ -744,7 +779,7 @@ int btstack_main(int argc, const char * argv[]){
 
 #ifdef HAVE_BTSTACK_STDIN
     // parse human readable Bluetooth address
-    sscanf_bd_addr(device_addr_string, device_addr);
+    // sscanf_bd_addr(device_addr_string, device_addr);
     btstack_stdin_setup(stdin_process);
 #endif
     // turn on!
