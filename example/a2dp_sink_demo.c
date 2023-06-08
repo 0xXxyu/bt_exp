@@ -78,6 +78,7 @@
 
 #include "btstack_ring_buffer.h"
 
+
 #ifdef HAVE_POSIX_FILE_IO
 #include "wav_util.h"
 #define STORE_TO_WAV_FILE
@@ -295,6 +296,7 @@ static int a2dp_and_avrcp_setup(void){
 
     // allow for role switch in general and sniff mode
     gap_set_default_link_policy_settings( LM_LINK_POLICY_ENABLE_ROLE_SWITCH | LM_LINK_POLICY_ENABLE_SNIFF_MODE );
+    // change role
 
     // allow for role switch on outgoing connections - this allows A2DP Source, e.g. smartphone, to become master when we re-connect to it
     gap_set_allow_role_switch(true);
@@ -897,6 +899,7 @@ static void a2dp_sink_packet_handler(uint8_t packet_type, uint16_t channel, uint
     }
 }
 
+#define HAVE_BTSTACK_STDIN
 #ifdef HAVE_BTSTACK_STDIN
 static void show_usage(void){
     bd_addr_t      iut_address;

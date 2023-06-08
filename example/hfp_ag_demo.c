@@ -73,15 +73,19 @@ const char hfp_ag_service_name[] = "HFP AG Test Heeiie";
 
 static bd_addr_t device_addr;
 // static const char * device_addr_string = "00:1A:7D:DA:71:13";
-
-//MS11 
-static const char * device_addr_string = "A4:04:50:23:83:AB";
+ 
+// static const char * device_addr_string = "A4:04:50:23:83:AB";
 
 #ifdef ENABLE_HFP_WIDE_BAND_SPEECH
 static uint8_t codecs[] = {HFP_CODEC_CVSD, HFP_CODEC_MSBC};
 #else
 static uint8_t codecs[] = {HFP_CODEC_CVSD};
 #endif
+
+// add input from user 1
+static bd_addr_t cmdline_addr;
+static int cmdline_addr_found = 0;
+// add input from user end
 
 static uint8_t negotiated_codec = HFP_CODEC_CVSD;
 
@@ -158,7 +162,7 @@ static void show_usage(void){
     printf("\n--- Bluetooth HFP Audiogateway (AG) unit Test Console %s ---\n", bd_addr_to_str(iut_address));
     printf("\n");
     
-    printf("a - establish HFP connection to %s\n", bd_addr_to_str(device_addr));
+    printf("a - establish HFP connection to %s\n", bd_addr_to_str(cmdline_addr));
     // printf("A - release HFP connection\n");
     
     printf("b - establish AUDIO connection          | B - release AUDIO connection\n");
@@ -200,9 +204,13 @@ static void stdin_process(char cmd){
     switch (cmd){
         case 'a':
             log_info("USER:\'%c\'", cmd);
-            printf("Establish HFP service level connection to %s...\n", bd_addr_to_str(device_addr));
-            status = hfp_ag_establish_service_level_connection(device_addr);
-            break;
+            // change input addr 2
+            if (cmdline_addr_found){
+                printf("Establish HFP service level connection to %s...\n", bd_addr_to_str(cmdline_addr));
+                status = hfp_ag_establish_service_level_connection(device_addr);
+                break;
+            }
+            
         case 'A':
             log_info("USER:\'%c\'", cmd);
             printf("Release HFP service level connection.\n");
@@ -724,7 +732,29 @@ static hfp_phone_number_t subscriber_number = {
 
 int btstack_main(int argc, const char * argv[]);
 int btstack_main(int argc, const char * argv[]){
-    (void)argc;
+    //add input from user 
+     // change 4
+
+    int arg = 1;
+    cmdline_addr_found = 0;
+
+    while (!cmdline_addr_found){
+        if (arg < argc){
+            if(!strcmp(argv[arg], "-a") || !strcmp(argv[arg], "--address")){
+            arg++;
+            cmdline_addr_found = sscanf_bd_addr(argv[arg], cmdline_addr);
+            arg++;
+            }
+        }
+        else {
+            // printf("Didn't find remote device.");
+            fprintf(stderr, "\nUsage: %s [-a|--address aa:bb:cc:dd:ee:ff]\n", argv[0]);
+            exit(1);
+        }
+    }
+
+    // printf("find device: %s\n", bd_addr_to_str(cmdline_addr));
+    //add input from user end
     (void)argv;
 
     sco_demo_init();
@@ -786,7 +816,8 @@ int btstack_main(int argc, const char * argv[]){
     hfp_ag_register_packet_handler(&packet_handler);
 
     // parse human readable Bluetooth address
-    sscanf_bd_addr(device_addr_string, device_addr);
+    // sscanf_bd_addr(device_addr_string, device_addr);
+
 
 #ifdef HAVE_BTSTACK_STDIN
     btstack_stdin_setup(stdin_process);

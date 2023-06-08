@@ -117,6 +117,8 @@ static void dump_supported_codecs(void){
     }
 }
 
+#define HAVE_BTSTACK_STDIN
+
 #ifdef HAVE_BTSTACK_STDIN
 
 // Testig User Interface 

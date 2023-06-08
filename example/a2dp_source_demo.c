@@ -75,6 +75,7 @@
 
 //#define AVRCP_BROWSING_ENABLED
 
+#define HAVE_BTSTACK_STDIN
 #define NUM_CHANNELS                2
 #define BYTES_PER_AUDIO_SAMPLE      (2*NUM_CHANNELS)
 #define AUDIO_TIMEOUT_MS            10 
@@ -314,7 +315,7 @@ static int a2dp_source_and_avrcp_services_init(void){
     // Set local name with a template Bluetooth address, that will be automatically
     // replaced with a actual address once it is available, i.e. when BTstack boots
     // up and starts talking to a Bluetooth module.
-    gap_set_local_name("A2DP Source 00:00:00:00:00:00");
+    gap_set_local_name("A2DP Source Test Heeiie");
     gap_discoverable_control(1);
     gap_set_class_of_device(0x200408);
     
