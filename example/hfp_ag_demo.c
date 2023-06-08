@@ -761,6 +761,8 @@ int btstack_main(int argc, const char * argv[]){
     // 修改成slave
 
     gap_set_local_name("HFP AG Test Heeiie");
+    gap_ssp_set_io_capability(SSP_IO_CAPABILITY_NO_INPUT_NO_OUTPUT);
+    // change 5 
     gap_discoverable_control(1);
 
     // L2CAP

@@ -723,8 +723,10 @@ int btstack_main(int argc, const char * argv[]){
     sco_demo_init();
 
     gap_discoverable_control(1);
-    gap_set_class_of_device(0x200408);   
-    gap_set_local_name("HFP HF Demo 00:00:00:00:00:00");
+    gap_set_class_of_device(0x200408); 
+    gap_set_local_name("HFP HF Test Heeiie");
+    gap_ssp_set_io_capability(SSP_IO_CAPABILITY_NO_INPUT_NO_OUTPUT);
+    // just work change 
 
     // init L2CAP
     l2cap_init();
