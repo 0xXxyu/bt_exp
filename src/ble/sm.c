@@ -196,7 +196,10 @@ static uint8_t sm_accepted_stk_generation_methods;
 static uint8_t sm_max_encryption_key_size;
 static uint8_t sm_min_encryption_key_size;
 static uint8_t sm_auth_req = 0;
-static uint8_t sm_io_capabilities = IO_CAPABILITY_NO_INPUT_NO_OUTPUT; //修改IO能力
+// static uint8_t sm_io_capabilities = IO_CAPABILITY_NO_INPUT_NO_OUTPUT; //修改IO能力
+
+// bypass pincode change 2
+static uint8_t sm_io_capabilities = IO_CAPABILITY_DISPLAY_ONLY;
 static uint32_t sm_fixed_passkey_in_display_role;
 static bool sm_reconstruct_ltk_without_le_device_db_entry;
 
@@ -3076,6 +3079,7 @@ static void sm_run(void){
             //     return;
             // }
             case SM_PH2_C1_SEND_PAIRING_CONFIRM: {
+                // bypass pincode change 3
                 // 发送pairing confirm包之后开个监听等待回传，远端设备会弹出一个输入框，等待passkey的输入
 
                 // 本地不对confirm进行处理，直接转到下一个状态SM_INITIATOR_PH2_W4_PAIRING_CONFIRM
@@ -3095,7 +3099,7 @@ static void sm_run(void){
 
                 // send pairing confirm 1
                 sm_send_connectionless(connection, (uint8_t*) buffer, sizeof(buffer));
-                printf("1111111\n");
+                // printf("1111111\n");
 
                 sm_timeout_reset(connection);
                 return;

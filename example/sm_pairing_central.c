@@ -126,6 +126,7 @@ static void sm_pairing_central_setup(void){
     // sm_set_authentication_requirements(0);
 
     // LE Legacy Pairing, Passkey entry initiator enter, responder (us) displays
+    // bypass pincode change 1
     sm_set_io_capabilities(IO_CAPABILITY_DISPLAY_ONLY);
     // sm_set_authentication_requirements(SM_AUTHREQ_MITM_PROTECTION);
     // sm_use_fixed_passkey_in_display_role(FIXED_PASSKEY);
