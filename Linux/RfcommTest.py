@@ -1,13 +1,15 @@
 import bluetooth
 import argparse
 
-# linux 环境
 
 parser = argparse.ArgumentParser()
 parser.add_argument('-m', '--mac', help='mac address of target', required=True)
-parser.add_argument('-u', '--uuid', help='target uuid', action='store_true')
-parser.add_argument('-p', '--port', help='target port', action='store_true')
-# parser.add_argument('-s', '--scan', help='print sdp info', action='store_true')         //扫描目标设备sdp接口
+parser.add_argument('-u', '--uuid', help='target uuid')
+parser.add_argument('-p', '--port', type=int, help='target port')
+# parser.add_argument('-s', '--scan', help='print sdp info', action='store_true')
+
+# group = parser.add_mutually_exclusive_group()
+# group.add_argument('-u', '--uuid', help='target uuid')
 
 args = parser.parse_args()
 
@@ -48,10 +50,12 @@ def test_by_port(port, addr):
     socket.close()
 
 
-if __name__ == '__main__':
-    if args.uuid and args.addr:
-        test_by_uuid(args.uuid, args.addr)
-    elif args.port and args.addr:
-        test_by_port(args.port,args.addr)
+if __name__ == '__main__':   
+    if args.uuid and args.mac:
+        print("观察目标设备是否弹窗，如无弹窗，可进一步分析利用")
+        test_by_uuid(args.uuid, args.mac)
+    elif args.port and args.mac:
+        print("观察目标设备是否弹窗，如无弹窗，可进一步分析利用")
+        test_by_port(args.port,args.mac)
     else:
         parser.print_help()
