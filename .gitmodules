@@ -1,0 +1,9 @@
+[submodule "GattFuzz"]
+	path = GattFuzz
+	url = https://github.com/0xXxyu/GattFuzz.git
+[submodule "nOBEX"]
+	path = nOBEX
+	url = https://github.com/nccgroup/nOBEX.git
+[submodule "braktooth_esp32_bluetooth_classic_attacks"]
+	path = braktooth_esp32_bluetooth_classic_attacks
+	url = https://github.com/Matheus-Garbelini/braktooth_esp32_bluetooth_classic_attacks.git
